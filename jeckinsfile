@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo 'Checkout successful'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'if not exist index.html exit /b 1'
+                bat 'if not exist about.html exit /b 1'
+                bat 'if not exist departments.html exit /b 1'
+                bat 'if not exist style.css exit /b 1'
+                echo 'Build successful'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'findstr /i "<html" index.html'
+                echo 'Test successful'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                archiveArtifacts artifacts: '*.html,*.css',
+                                 fingerprint: true
+                echo 'Website artifacts archived'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'College website pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
